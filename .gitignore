@@ -9,6 +9,9 @@ venv/
 ENV/
 env/
 
+# Outputs (derived from raw data)
+outputs/
+
 # Jupyter / notebooks
 .ipynb_checkpoints/
 

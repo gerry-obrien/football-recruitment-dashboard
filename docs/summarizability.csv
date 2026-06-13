@@ -1,0 +1,24 @@
+Measure,Table,Category,Summarizability,Valid aggregations
+overall,fact_player_season,value-per-unit,non-additive,"AVG, MIN, MAX"
+potential,fact_player_season,value-per-unit,non-additive,"AVG, MIN, MAX"
+value_eur,fact_player_season,stock,semi-additive,"AVG, MIN, MAX (SUM within single fifa_version only)"
+market_value_eur,dim_player,stock,semi-additive,"AVG, MIN, MAX"
+highest_market_value_eur,dim_player,stock,semi-additive,"AVG, MIN, MAX"
+minutes_90s,fact_performance,flow,additive,"SUM, AVG, MIN, MAX"
+xg_per90,fact_performance,pre-aggregated value-per-unit,non-additive,AVG only
+npxg_per90,fact_performance,pre-aggregated value-per-unit,non-additive,AVG only
+xag_per90,fact_performance,pre-aggregated value-per-unit,non-additive,AVG only
+ast_per90,fact_performance,pre-aggregated value-per-unit,non-additive,AVG only
+key_passes_per90,fact_performance,pre-aggregated value-per-unit,non-additive,AVG only
+goals_non_pen_per90,fact_performance,pre-aggregated value-per-unit,non-additive,AVG only
+tackles_per90,fact_performance,pre-aggregated value-per-unit,non-additive,AVG only
+interceptions_per90,fact_performance,pre-aggregated value-per-unit,non-additive,AVG only
+clearances_per90,fact_performance,pre-aggregated value-per-unit,non-additive,AVG only
+errors_per90,fact_performance,pre-aggregated value-per-unit,non-additive,AVG only (inverted — lower is better)
+prog_passes_per90,fact_performance,pre-aggregated value-per-unit,non-additive,AVG only
+prog_carries_per90,fact_performance,pre-aggregated value-per-unit,non-additive,AVG only
+prog_receptions_per90,fact_performance,pre-aggregated value-per-unit,non-additive,AVG only
+save_pct,fact_performance,pre-aggregated value-per-unit,non-additive,AVG only (null for outfield players)
+cs_pct,fact_performance,pre-aggregated value-per-unit,non-additive,AVG only (null for outfield players)
+ga_per90,fact_performance,pre-aggregated value-per-unit,non-additive,AVG only (inverted — lower is better; null for outfield players)
+performance_index,fact_performance,pre-aggregated value-per-unit,non-additive,AVG only
