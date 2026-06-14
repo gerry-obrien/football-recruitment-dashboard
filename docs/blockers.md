@@ -14,21 +14,37 @@ The nationality field is `country_of_citizenship` and contains text country name
 ---
 
 ## Blocker 2 — FIFA nationality_name → dim_country name mismatches
-**Status: MUST RESOLVE before fact_player_season script**
+**Status: RESOLVED** (anti-join run against all 178 distinct FIFA nationality values)
 
-FIFA uses text nationality names (e.g. "South Korea", "United States") that may not exactly match TM dim_country.name values. Mismatches silently drop players from the Page 1 choropleth.
+TM countries.csv has only 118 countries. Of 178 distinct FIFA nationality_name values, 105 matched exactly and 73 did not. The 73 split into two groups:
 
-**Decision:** After building dim_country, run an anti-join: extract all distinct `nationality_name` values from FIFA v19/v21/v23, left-join against dim_country.name, and print the unmatched list. Build a manual correction dict in the fact_player_season script to patch known mismatches before the FK join. Common expected mismatches:
+**Group A — naming differences (6 values, fixable with correction dict):**
 
-| FIFA value | Expected TM value |
+| FIFA nationality_name | TM country_name |
 |---|---|
-| South Korea | Korea, Republic of |
-| United States | United States of America |
-| Czech Republic | Czechia |
-| Bosnia-Herzegovina | Bosnia and Herzegovina |
-| England / Scotland / Wales / Northern Ireland | verify exact TM names |
+| Bosnia and Herzegovina | Bosnia-Herzegovina |
+| China PR | China |
+| Hong Kong | Hongkong |
+| Republic of Ireland | Ireland |
+| Korea Republic | Korea, South |
+| Turkey | Türkiye |
 
-The anti-join check must be run as part of writing the script, not assumed.
+**Group B — countries genuinely absent from TM's 118-country database (67 values):**
+These include Angola, Cameroon, Côte d'Ivoire, Congo DR, Burkina Faso, Mali, Senegal... wait — Senegal IS matched. The absent ones include: Afghanistan, Angola, Antigua and Barbuda, Aruba, Bahrain, Barbados, Belize, Benin, Bermuda, Botswana, Burkina Faso, Burundi, Cameroon, Cape Verde Islands, Central African Republic, Chad, Congo, Congo DR, Cuba, Curacao, Côte d'Ivoire, Equatorial Guinea, Eritrea, Gabon, Gambia, Grenada, Guam, Guinea, Guinea Bissau, Guyana, Haiti, Kenya, Korea DPR, Kuwait, Liberia, Liechtenstein, Macau, Madagascar, Malawi, Mali, Mauritania, Mauritius, Montserrat, Mozambique, Namibia, New Caledonia, Niger, Palestine, Papua New Guinea, Rwanda, Saint Kitts and Nevis, Saint Lucia, Seychelles, Sierra Leone, Somalia, South Sudan, Sudan, Suriname, Syria, São Tomé e Príncipe, Tanzania, Togo, Trinidad and Tobago, Vanuatu, Yemen, Zambia, Zimbabwe.
+
+**Decision:** Apply the 6-entry correction dict before the FK join. Players from Group B countries receive `nationality_country_id = null` and are excluded from the Page 1 choropleth. Disclose this as a limitation in the report — TM's country scope determines which nationalities are visible on the map.
+
+**Correction dict for cleaning script:**
+```python
+NATIONALITY_CORRECTIONS = {
+    "Bosnia and Herzegovina": "Bosnia-Herzegovina",
+    "China PR": "China",
+    "Hong Kong": "Hongkong",
+    "Republic of Ireland": "Ireland",
+    "Korea Republic": "Korea, South",
+    "Turkey": "Türkiye",
+}
+```
 
 ---
 
@@ -56,21 +72,27 @@ Players with very few minutes have extreme per-90 rates that distort percentile 
 ---
 
 ## Blocker 5 — FBref Comp prefix verification
-**Status: MUST VERIFY in script before fact_performance is written**
+**Status: RESOLVED** (confirmed by running distinct value check on FBref file)
 
-FBref Comp values contain a country prefix that must be stripped ("eng Premier League" → "Premier League") before mapping to TM competition_id.
+After stripping the first word, the five distinct Comp values are exactly:
+- Premier League → GB1
+- La Liga → ES1
+- Serie A → IT1
+- Ligue 1 → FR1
+- Bundesliga → L1
 
-**Decision:** In the fact_performance cleaning script, strip the first word from Comp and print all distinct cleaned values. Verify they match exactly against the expected mapping below before hardcoding it:
+**Competition mapping dict for cleaning script:**
+```python
+COMP_TO_COMPETITION_ID = {
+    "Premier League": "GB1",
+    "La Liga": "ES1",
+    "Serie A": "IT1",
+    "Ligue 1": "FR1",
+    "Bundesliga": "L1",
+}
+```
 
-| FBref Comp (cleaned) | TM competition_id |
-|---|---|
-| Premier League | GB1 |
-| La Liga | ES1 |
-| Serie A | IT1 |
-| Ligue 1 | FR1 |
-| Bundesliga | L1 |
-
-If the actual string differs (e.g. "LaLiga" vs "La Liga") update the mapping dict before proceeding.
+Row counts: Serie A 634, La Liga 601, Premier League 574, Ligue 1 553, Bundesliga 492. Total 2,854 rows confirmed.
 
 ---
 
