@@ -146,6 +146,10 @@ player_seasons = (
     .rename(columns={"tm_player_id": "player_id"})
     .copy()
 )
+# Cast FK columns to nullable integer so CSV writes "9" not "9.0"
+# This prevents Tableau treating them as decimals and failing to join
+for col in ["player_id", "nationality_country_id", "club_id"]:
+    player_seasons[col] = player_seasons[col].astype("Int64")
 player_seasons.insert(0, "id", range(1, len(player_seasons) + 1))
 
 print(f"  Final rows:    {len(player_seasons)}")

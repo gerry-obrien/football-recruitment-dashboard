@@ -110,6 +110,10 @@ out_cols = (
 )
 out_cols = [c for c in out_cols if c in enriched.columns]
 players_enriched = enriched[out_cols].copy()
+# Cast FK columns to nullable integer so CSV writes "9" not "9.0" — prevents Tableau join failures
+for col in ["player_id", "nationality_country_id", "current_club_id"]:
+    if col in players_enriched.columns:
+        players_enriched[col] = players_enriched[col].astype("Int64")
 players_enriched.to_csv(f"{OUT}/players_enriched.csv", index=False)
 
 print(f"  Rows: {len(players_enriched)}  |  Columns: {len(players_enriched.columns)}")
@@ -136,6 +140,7 @@ for bucket, metrics in POSITION_METRICS.items():
     radar_parts.append(melted)
 
 fbref_radar = pd.concat(radar_parts, ignore_index=True)
+fbref_radar["player_id"] = fbref_radar["player_id"].astype("Int64")
 fbref_radar.to_csv(f"{OUT}/fbref_radar.csv", index=False)
 
 print(f"  Rows: {len(fbref_radar)}")
