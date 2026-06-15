@@ -141,7 +141,7 @@ print("\n── 7. Assembling player_seasons.csv ──")
 player_seasons = (
     fifa[[
         "tm_player_id", "nationality_country_id", "competition_id", "club_id",
-        "position_bucket", "fifa_version", "overall", "potential", "value_eur",
+        "position_bucket", "league_name", "fifa_version", "overall", "potential", "value_eur",
     ]]
     .rename(columns={"tm_player_id": "player_id"})
     .copy()
